@@ -139,11 +139,11 @@ class DefaultProxyServiceTest {
                             routes =
                                 mapOf(
                                     "" to
-                                            listOf(
-                                                RouteRule("/", "http://service1"),
-                                                RouteRule("/api/v1", "http://service2"),
-                                                RouteRule("/api/v1/users", "http://service3"),
-                                            ),
+                                        listOf(
+                                            RouteRule("/", "http://service1"),
+                                            RouteRule("/api/v1", "http://service2"),
+                                            RouteRule("/api/v1/users", "http://service3"),
+                                        ),
                                 ),
                         ),
                 )
