@@ -15,7 +15,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 }
 
-group = "com.bittokazi.ktor.gateway"
+group = "com.bittokazi.sonartype"
 version = "1.0.0"
 
 application {
