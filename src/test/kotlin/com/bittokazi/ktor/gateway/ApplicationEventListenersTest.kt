@@ -10,7 +10,6 @@ import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.testing.testApplication
 import io.ktor.utils.io.InternalAPI
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.runner.RunWith
 import org.mockito.Mock

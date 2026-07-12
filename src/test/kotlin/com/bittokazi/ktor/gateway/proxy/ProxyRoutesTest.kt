@@ -675,7 +675,7 @@ class ProxyRoutesTest {
                                                     ),
                                                 ),
                                         ),
-                                    oauthClients = mapOf(), // No oauth config
+                                    oauthClients = mapOf(),
                                 ),
                             idpClient = idpClient,
                             proxyClient = proxyClient,
@@ -1041,7 +1041,7 @@ class ProxyRoutesTest {
                                                     ),
                                                 ),
                                         ),
-                                    oauthClients = mapOf(), // No oauth config
+                                    oauthClients = mapOf(),
                                 ),
                             idpClient = idpClient,
                             proxyClient = proxyClient,
