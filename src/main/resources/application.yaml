@@ -9,19 +9,12 @@ proxy:
   enabled: true
   gateway-oauth-base-path: "/gw"
   session-validity-in-seconds: 60
-#  routes:
-#    - prefix: /
-#      target: http://192.168.10.1
-#      secure: true
-#    - prefix: /cgi-bin
-#      target: http://192.168.10.1
-#      secure: true
-#    - prefix: /luci-static
-#      target: http://192.168.10.1
-#      secure: true
   routes:
     "": #blank means default/any domain will match
       - prefix: /api
+        target: http://127.0.0.1:8081
+        authType: TOKEN_BASED
+      - prefix: /public/api
         target: http://127.0.0.1:8081
       - prefix: /oauth
         target: http://127.0.0.1:8081
@@ -35,9 +28,23 @@ proxy:
         target: http://127.0.0.1:3039
       - prefix: /static
         target: http://127.0.0.1:3039
+    "example.com":
+      - prefix: /
+        target: http://192.168.10.1
+        authType: SESSION_BASED
+      - prefix: /cgi-bin
+        target: http://192.168.10.1
+        authType: SESSION_BASED
+      - prefix: /luci-static
+        target: http://192.168.10.1
+        authType: SESSION_BASED
+    "example1.com":
+      - prefix: /
+        target: http://192.168.10.1
+        secure: true
   oauth-clients:
-    "":
-      clientId: "kubernetes-api-frontend"
+    "": #blank means default/any domain will match
+      clientId: "api-client"
       clientSecret: "secret"
       scopes:
         - openid
@@ -47,8 +54,8 @@ proxy:
       tokenUrl: "http://localhost:8081/oauth/token"
       introspectUrl: "http://localhost:8081/oauth/introspect"
       logoutUrl: "http://localhost:8081/oauth/logout"
-    "bittokazi.com":
-      clientId: "kubernetes-api-frontend"
+    "example1.com":
+      clientId: "api-client"
       clientSecret: "secret"
       scopes:
         - openid
@@ -58,11 +65,3 @@ proxy:
       tokenUrl: "http://localhost:8081/oauth/token"
       introspectUrl: "http://localhost:8081/oauth/introspect"
       logoutUrl: "http://localhost:8081/oauth/logout"
-
-
-idp-client-config:
-  enabled: true
-  end-point: http://localhost:8081
-  client:
-    clientId: "kubernetes-api-frontend"
-    clientSecret: "secret"

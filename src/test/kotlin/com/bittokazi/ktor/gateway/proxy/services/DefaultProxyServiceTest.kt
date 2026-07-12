@@ -127,6 +127,41 @@ class DefaultProxyServiceTest {
         }
 
     @Test
+    fun testGetRuleUsesBasePrefix() =
+        runTest {
+            defaultProxyService =
+                DefaultProxyService(
+                    idpClient = idpClient,
+                    proxyClient = proxyClient,
+                    proxyConfig =
+                        ProxyConfig(
+                            enabled = true,
+                            routes =
+                                mapOf(
+                                    "" to
+                                        listOf(
+                                            RouteRule("/", "http://service1"),
+                                            RouteRule("/api/v1", "http://service2"),
+                                            RouteRule("/api/v1/users", "http://service3"),
+                                        ),
+                                ),
+                        ),
+                )
+
+            var rule = defaultProxyService.getRule("", "/any/route", call)
+            assertEquals("http://service1", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/api/v1/any", call)
+            assertEquals("http://service2", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/api/v1", call)
+            assertEquals("http://service2", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/api/v1/users", call)
+            assertEquals("http://service3", rule?.target)
+        }
+
+    @Test
     fun testHostSpecificRuleOverridesDefaultRule() =
         runTest {
             defaultProxyService =

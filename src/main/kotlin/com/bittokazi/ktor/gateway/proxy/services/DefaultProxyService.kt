@@ -176,10 +176,10 @@ class DefaultProxyService(
         call: ApplicationCall,
     ): RouteRule? {
         return proxyConfig.routes[domain]
-            ?.filter { path == it.prefix || path.startsWith("${it.prefix}/") }
+            ?.filter { path == it.prefix || path.startsWith(it.prefix) }
             ?.maxByOrNull { it.prefix.length } ?: run {
             proxyConfig.routes[""]
-                ?.filter { path == it.prefix || path.startsWith("${it.prefix}/") }
+                ?.filter { path == it.prefix || path.startsWith(it.prefix) }
                 ?.maxByOrNull { it.prefix.length }
         }
     }
