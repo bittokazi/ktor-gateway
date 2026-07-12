@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "2.3.0"
-    id("io.ktor.plugin") version "3.4.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.ktor)
+    alias(libs.plugins.kotlin.plugin.serialization)
 
     // for publishing
     id("signing")
@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "com.bittokazi.ktor.gateway"
-version = "0.0.1"
+version = "1.0.0"
 
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
@@ -45,7 +45,7 @@ dependencies {
     implementation(libs.ktor.oauth.authorization.server)
 
     testImplementation(libs.ktor.server.test.host)
-    testImplementation("io.ktor:ktor-client-mock:3.4.0")
+    testImplementation(libs.ktor.client.mock)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
