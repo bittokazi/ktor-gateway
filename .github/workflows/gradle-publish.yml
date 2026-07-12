@@ -29,7 +29,7 @@ jobs:
         id: check_version
         run: |
           GROUP_ID=com.bittokazi.sonartype
-          ARTIFACT_ID=ktor-oauth-authorization-server
+          ARTIFACT_ID=ktor-gateway
           URL="https://repo1.maven.org/maven2/${GROUP_ID//./\/}/$ARTIFACT_ID/$VERSION/"
           echo "Checking $URL"
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
