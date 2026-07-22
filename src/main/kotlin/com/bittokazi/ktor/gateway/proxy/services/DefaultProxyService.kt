@@ -170,18 +170,25 @@ class DefaultProxyService(
         }
     }
 
+    fun matches(
+        path: String,
+        prefix: String,
+    ): Boolean =
+        prefix == "/" ||
+            path == prefix ||
+            (path.startsWith(prefix) && path.getOrNull(prefix.length) == '/')
+
     override suspend fun getRule(
         domain: String?,
         path: String,
         call: ApplicationCall,
     ): RouteRule? {
         return proxyConfig.routes[domain]
-            ?.filter { path == it.prefix || path.startsWith(it.prefix) }
-            ?.maxByOrNull { it.prefix.length } ?: run {
-            proxyConfig.routes[""]
-                ?.filter { path == it.prefix || path.startsWith(it.prefix) }
+            ?.filter { matches(path, it.prefix) }
+            ?.maxByOrNull { it.prefix.length }
+            ?: proxyConfig.routes[""]
+                ?.filter { matches(path, it.prefix) }
                 ?.maxByOrNull { it.prefix.length }
-        }
     }
 
     override suspend fun getOauthClient(

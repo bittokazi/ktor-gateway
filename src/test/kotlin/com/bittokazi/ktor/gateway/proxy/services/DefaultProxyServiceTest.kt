@@ -143,12 +143,22 @@ class DefaultProxyServiceTest {
                                             RouteRule("/", "http://service1"),
                                             RouteRule("/api/v1", "http://service2"),
                                             RouteRule("/api/v1/users", "http://service3"),
+                                            RouteRule("/api", "http://service4"),
                                         ),
                                 ),
                         ),
                 )
 
             var rule = defaultProxyService.getRule("", "/any/route", call)
+            assertEquals("http://service1", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/", call)
+            assertEquals("http://service1", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/api", call)
+            assertEquals("http://service4", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/api-public", call)
             assertEquals("http://service1", rule?.target)
 
             rule = defaultProxyService.getRule("", "/api/v1/any", call)
