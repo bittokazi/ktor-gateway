@@ -1,7 +1,10 @@
 package com.bittokazi.ktor.gateway.clients
 
+import com.auth0.jwk.JwkProviderBuilder
 import com.bittokazi.ktor.gateway.clients.idp.IdpClient
 import com.bittokazi.ktor.gateway.clients.proxy.ProxyClient
+import com.bittokazi.ktor.gateway.proxy.config.ProxyConfig
+import com.bittokazi.ktor.gateway.security.services.DefaultCustomJwkProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -9,8 +12,11 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
 import kotlinx.serialization.json.Json
+import java.net.URI
 
 fun Application.configureClientModule() {
+    val proxyConfig: ProxyConfig by dependencies
+
     dependencies {
         provide {
             IdpClient(
@@ -23,6 +29,13 @@ fun Application.configureClientModule() {
                         )
                     }
                 },
+                DefaultCustomJwkProvider(
+                    providers =
+                        proxyConfig.oauthClients.entries.associate { oauthClientConfig ->
+                            oauthClientConfig.value.tokenUrl to
+                                JwkProviderBuilder(URI(oauthClientConfig.value.jwksUrl).toURL()).build()
+                        },
+                ),
             )
         }
 

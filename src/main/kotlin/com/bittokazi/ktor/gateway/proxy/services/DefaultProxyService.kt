@@ -111,7 +111,7 @@ class DefaultProxyService(
                     token?.let { token ->
                         when (
                             val result =
-                                idpClient.tokenIntrospect(
+                                idpClient.validateToken(
                                     token,
                                     oauthConfig,
                                 )

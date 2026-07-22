@@ -17,14 +17,14 @@ fun Application.applicationEventListeners() {
         )
 
         tableInfoPrinterService.printTable(
-            listOf("Domain", "Client Id", "Scopes", "Authorization URL", "Introspect URL", "Token URL", "Logout URL"),
+            listOf("Domain", "Client Id", "Scopes", "Authorization URL", "Issuer", "Token URL", "Logout URL"),
             proxyConfig.oauthClients.map { client ->
                 listOf(
                     client.key,
                     client.value.clientId,
                     client.value.scopes.joinToString(","),
                     client.value.authorizeUrl,
-                    client.value.introspectUrl,
+                    client.value.issuer,
                     client.value.tokenUrl,
                     client.value.logoutUrl,
                 )

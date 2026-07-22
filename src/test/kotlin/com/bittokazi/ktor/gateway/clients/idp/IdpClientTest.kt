@@ -1,8 +1,13 @@
 package com.bittokazi.ktor.gateway.clients.idp
 
+import com.auth0.jwk.Jwk
+import com.auth0.jwk.JwkProvider
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.bittokazi.ktor.gateway.clients.idp.entity.RefreshTokenRequest
 import com.bittokazi.ktor.gateway.common.CallResult
 import com.bittokazi.ktor.gateway.common.OauthClient
+import com.bittokazi.ktor.gateway.security.services.CustomJwkProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -23,7 +28,12 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.junit.runner.RunWith
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.any
+import java.security.KeyPairGenerator
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -40,6 +50,9 @@ class IdpClientTest {
 
     @Mock
     lateinit var origin: RequestConnectionPoint
+
+    @Mock
+    lateinit var customJwkProvider: CustomJwkProvider
 
     @Test
     fun `fetchRefreshToken returns success when idp responds with 200`() =
@@ -63,7 +76,7 @@ class IdpClientTest {
                     }
                 }
 
-            val idpClient = IdpClient(client)
+            val idpClient = IdpClient(client, customJwkProvider)
 
             val oauthClient =
                 OauthClient(
@@ -72,7 +85,8 @@ class IdpClientTest {
                     scopes = listOf("read"),
                     authorizeUrl = "http://idp/authorize",
                     tokenUrl = "http://idp/token",
-                    introspectUrl = "http://idp/introspect",
+                    issuer = "http://idp:8080",
+                    jwksUrl = "http://idp:8080/jwks",
                     logoutUrl = "http://idp/logout",
                 )
 
@@ -109,7 +123,7 @@ class IdpClientTest {
                     }
                 }
 
-            val idpClient = IdpClient(client)
+            val idpClient = IdpClient(client, customJwkProvider)
 
             val oauthClient =
                 OauthClient(
@@ -118,7 +132,8 @@ class IdpClientTest {
                     scopes = listOf("read"),
                     authorizeUrl = "http://idp/authorize",
                     tokenUrl = "http://idp/token",
-                    introspectUrl = "http://idp/introspect",
+                    issuer = "http://idp:8080",
+                    jwksUrl = "http://idp:8080/jwks",
                     logoutUrl = "http://idp/logout",
                 )
 
@@ -150,7 +165,9 @@ class IdpClientTest {
                     }
                 }
 
-            val idpClient = IdpClient(client)
+            val customJwkProvider = mock(CustomJwkProvider::class.java)
+
+            val idpClient = IdpClient(client, customJwkProvider)
 
             val oauthClient =
                 OauthClient(
@@ -159,7 +176,8 @@ class IdpClientTest {
                     scopes = listOf("read"),
                     authorizeUrl = "http://idp/authorize",
                     tokenUrl = "http://idp/token",
-                    introspectUrl = "http://idp/introspect",
+                    issuer = "http://idp:8080",
+                    jwksUrl = "http://idp:8080/jwks",
                     logoutUrl = "http://idp/logout",
                 )
 
@@ -193,7 +211,7 @@ class IdpClientTest {
                     }
                 }
 
-            val idpClient = IdpClient(client)
+            val idpClient = IdpClient(client, customJwkProvider)
 
             val oauthClient =
                 OauthClient(
@@ -202,7 +220,8 @@ class IdpClientTest {
                     scopes = listOf("read"),
                     authorizeUrl = "http://idp/authorize",
                     tokenUrl = "http://idp/token",
-                    introspectUrl = "http://idp/introspect",
+                    issuer = "http://idp:8080",
+                    jwksUrl = "http://idp:8080/jwks",
                     logoutUrl = "http://idp/logout",
                 )
 
@@ -240,7 +259,7 @@ class IdpClientTest {
                     }
                 }
 
-            val idpClient = IdpClient(client)
+            val idpClient = IdpClient(client, customJwkProvider)
 
             val oauthClient =
                 OauthClient(
@@ -249,7 +268,8 @@ class IdpClientTest {
                     scopes = listOf("read"),
                     authorizeUrl = "http://idp/authorize",
                     tokenUrl = "http://idp/token",
-                    introspectUrl = "http://idp/introspect",
+                    issuer = "http://idp:8080",
+                    jwksUrl = "http://idp:8080/jwks",
                     logoutUrl = "http://idp/logout",
                 )
 
@@ -281,7 +301,7 @@ class IdpClientTest {
                     }
                 }
 
-            val idpClient = IdpClient(client)
+            val idpClient = IdpClient(client, customJwkProvider)
 
             val oauthClient =
                 OauthClient(
@@ -290,7 +310,8 @@ class IdpClientTest {
                     scopes = listOf("read"),
                     authorizeUrl = "http://idp/authorize",
                     tokenUrl = "http://idp/token",
-                    introspectUrl = "http://idp/introspect",
+                    issuer = "http://idp:8080",
+                    jwksUrl = "http://idp:8080/jwks",
                     logoutUrl = "http://idp/logout",
                 )
 
@@ -301,7 +322,7 @@ class IdpClientTest {
         }
 
     @Test
-    fun `tokenIntrospect returns success when idp responds with 200`() =
+    fun `validateToken returns success when token is valid`() =
         runTest {
             val responseJson =
                 """{"active": "true"}"""
@@ -322,7 +343,27 @@ class IdpClientTest {
                     }
                 }
 
-            val idpClient = IdpClient(client)
+            val jwkProvider = mock<JwkProvider>()
+            val jwk = mock<Jwk>()
+
+            val keyPair =
+                KeyPairGenerator.getInstance("RSA").apply {
+                    initialize(2048)
+                }.generateKeyPair()
+
+            given(customJwkProvider.getJwkProvider("http://idp:8080"))
+                .willReturn(jwkProvider)
+
+            given(jwk.publicKey).willReturn(keyPair.public as RSAPublicKey)
+            given(jwkProvider.get(any())).willReturn(jwk)
+
+            val token =
+                JWT.create()
+                    .withIssuer("http://idp:8080")
+                    .withKeyId("test-key")
+                    .sign(Algorithm.RSA256(null, keyPair.private as RSAPrivateKey))
+
+            val idpClient = IdpClient(client, customJwkProvider)
 
             val oauthClient =
                 OauthClient(
@@ -331,11 +372,12 @@ class IdpClientTest {
                     scopes = listOf("read"),
                     authorizeUrl = "http://idp/authorize",
                     tokenUrl = "http://idp/token",
-                    introspectUrl = "http://idp/introspect",
+                    issuer = "http://idp:8080",
+                    jwksUrl = "http://idp:8080/jwks",
                     logoutUrl = "http://idp/logout",
                 )
 
-            val result = idpClient.tokenIntrospect("test-token", oauthClient)
+            val result = idpClient.validateToken(token, oauthClient)
 
             assertTrue(result is CallResult.Success)
             val outcome = result.outcome
@@ -345,7 +387,7 @@ class IdpClientTest {
         }
 
     @Test
-    fun `tokenIntrospect returns failure when idp responds with 401`() =
+    fun `validateToken returns failure when issuer does not match`() =
         runTest {
             val responseJson = ""
 
@@ -365,7 +407,27 @@ class IdpClientTest {
                     }
                 }
 
-            val idpClient = IdpClient(client)
+            val jwkProvider = mock<JwkProvider>()
+            val jwk = mock<Jwk>()
+
+            val keyPair =
+                KeyPairGenerator.getInstance("RSA").apply {
+                    initialize(2048)
+                }.generateKeyPair()
+
+            given(customJwkProvider.getJwkProvider("http://idp:8081"))
+                .willReturn(jwkProvider)
+
+            given(jwk.publicKey).willReturn(keyPair.public as RSAPublicKey)
+            given(jwkProvider.get(any())).willReturn(jwk)
+
+            val token =
+                JWT.create()
+                    .withIssuer("http://idp:8080")
+                    .withKeyId("test-key")
+                    .sign(Algorithm.RSA256(null, keyPair.private as RSAPrivateKey))
+
+            val idpClient = IdpClient(client, customJwkProvider)
 
             val oauthClient =
                 OauthClient(
@@ -374,19 +436,19 @@ class IdpClientTest {
                     scopes = listOf("read"),
                     authorizeUrl = "http://idp/authorize",
                     tokenUrl = "http://idp/token",
-                    introspectUrl = "http://idp/introspect",
+                    issuer = "http://idp:8081",
+                    jwksUrl = "http://idp:8080/jwks",
                     logoutUrl = "http://idp/logout",
                 )
 
-            val result = idpClient.tokenIntrospect("test-token", oauthClient)
+            val result = idpClient.validateToken(token, oauthClient)
 
             assertTrue(result is CallResult.Failure)
             assertEquals(IdpClientErrorCode.UNAUTHORIZED, result.errorCode)
         }
 
-    @ParameterizedTest
-    @ValueSource(ints = [404, 400, 422, 403, 500, 502, 406])
-    fun `tokenIntrospect returns failure when idp responds with different status codes`(statusCode: Int) =
+    @Test
+    fun `validateToken returns 401 when token is invalid`() =
         runTest {
             val responseJson = ""
 
@@ -394,7 +456,7 @@ class IdpClientTest {
                 MockEngine { _ ->
                     respond(
                         content = responseJson,
-                        status = HttpStatusCode.fromValue(statusCode),
+                        status = HttpStatusCode.OK,
                         headers = headersOf("Content-Type", "application/json"),
                     )
                 }
@@ -406,7 +468,7 @@ class IdpClientTest {
                     }
                 }
 
-            val idpClient = IdpClient(client)
+            val idpClient = IdpClient(client, customJwkProvider)
 
             val oauthClient =
                 OauthClient(
@@ -415,14 +477,15 @@ class IdpClientTest {
                     scopes = listOf("read"),
                     authorizeUrl = "http://idp/authorize",
                     tokenUrl = "http://idp/token",
-                    introspectUrl = "http://idp/introspect",
+                    issuer = "http://idp:8080",
+                    jwksUrl = "http://idp:8080/jwks",
                     logoutUrl = "http://idp/logout",
                 )
 
-            val result = idpClient.tokenIntrospect("test-token", oauthClient)
+            val result = idpClient.validateToken("test-token", oauthClient)
 
             assertTrue(result is CallResult.Failure)
-            assertEquals(IdpClientErrorCode.BAD_REQUEST, result.errorCode)
+            assertEquals(IdpClientErrorCode.UNAUTHORIZED, result.errorCode)
         }
 
     private fun setupCallMocks() {
