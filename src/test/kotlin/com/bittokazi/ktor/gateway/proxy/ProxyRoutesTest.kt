@@ -3,7 +3,7 @@ package com.bittokazi.ktor.gateway.proxy
 import com.bittokazi.ktor.auth.domains.token.OauthTokenResponse
 import com.bittokazi.ktor.gateway.clients.idp.IdpClient
 import com.bittokazi.ktor.gateway.clients.idp.IdpClientErrorCode
-import com.bittokazi.ktor.gateway.clients.idp.entity.TokenIntrospectResult
+import com.bittokazi.ktor.gateway.clients.idp.entity.TokenValidationResult
 import com.bittokazi.ktor.gateway.clients.proxy.ProxyClient
 import com.bittokazi.ktor.gateway.common.AuthType
 import com.bittokazi.ktor.gateway.common.CallResult
@@ -363,9 +363,10 @@ class ProxyRoutesTest {
                                                     clientId = "test-client",
                                                     clientSecret = "test-secret",
                                                     scopes = listOf("read", "write"),
+                                                    issuer = "http://idp:8080",
+                                                    jwksUrl = "http://idp:8080/jwks",
                                                     authorizeUrl = "http://idp:8080/authorize",
                                                     tokenUrl = "http://idp:8080/token",
-                                                    introspectUrl = "http://idp:8080/introspect",
                                                     logoutUrl = "http://idp:8080/logout",
                                                 ),
                                         ),
@@ -452,7 +453,8 @@ class ProxyRoutesTest {
                                                     scopes = listOf("read", "write"),
                                                     authorizeUrl = "http://idp:8080/authorize",
                                                     tokenUrl = "http://idp:8080/token",
-                                                    introspectUrl = "http://idp:8080/introspect",
+                                                    issuer = "http://idp:8080",
+                                                    jwksUrl = "http://idp:8080/jwks",
                                                     logoutUrl = "http://idp:8080/logout",
                                                 ),
                                         ),
@@ -548,7 +550,8 @@ class ProxyRoutesTest {
                                                     scopes = listOf("read", "write"),
                                                     authorizeUrl = "http://idp:8080/authorize",
                                                     tokenUrl = "http://idp:8080/token",
-                                                    introspectUrl = "http://idp:8080/introspect",
+                                                    issuer = "http://idp:8080",
+                                                    jwksUrl = "http://idp:8080/jwks",
                                                     logoutUrl = "http://idp:8080/logout",
                                                 ),
                                         ),
@@ -623,7 +626,8 @@ class ProxyRoutesTest {
                                                     scopes = listOf("read", "write"),
                                                     authorizeUrl = "http://idp:8080/authorize",
                                                     tokenUrl = "http://idp:8080/token",
-                                                    introspectUrl = "http://idp:8080/introspect",
+                                                    issuer = "http://idp:8080",
+                                                    jwksUrl = "http://idp:8080/jwks",
                                                     logoutUrl = "http://idp:8080/logout",
                                                 ),
                                         ),
@@ -729,7 +733,8 @@ class ProxyRoutesTest {
                                                     scopes = listOf("read", "write"),
                                                     authorizeUrl = "http://idp:8080/authorize",
                                                     tokenUrl = "http://idp:8080/token",
-                                                    introspectUrl = "http://idp:8080/introspect",
+                                                    issuer = "http://idp:8080",
+                                                    jwksUrl = "http://idp:8080/jwks",
                                                     logoutUrl = "http://idp:8080/logout",
                                                 ),
                                         ),
@@ -765,8 +770,8 @@ class ProxyRoutesTest {
             given(httpClientCall.bodyNullable(any())).willReturn(body)
 
             // Mock successful token introspection with active token
-            given(idpClient.tokenIntrospect(any(), any())).willReturn(
-                CallResult.Success(TokenIntrospectResult(active = true)),
+            given(idpClient.validateToken(any(), any())).willReturn(
+                CallResult.Success(TokenValidationResult(active = true)),
             )
 
             val client = createClient { }
@@ -809,8 +814,9 @@ class ProxyRoutesTest {
                                                     scopes = listOf("read", "write"),
                                                     authorizeUrl = "http://idp:8080/authorize",
                                                     tokenUrl = "http://idp:8080/token",
-                                                    introspectUrl = "http://idp:8080/introspect",
+                                                    issuer = "http://idp:8080",
                                                     logoutUrl = "http://idp:8080/logout",
+                                                    jwksUrl = "http://idp:8080/jwks",
                                                 ),
                                         ),
                                 ),
@@ -828,8 +834,8 @@ class ProxyRoutesTest {
             }
 
             // Mock successful token introspection but token is inactive (expired)
-            given(idpClient.tokenIntrospect(any(), any())).willReturn(
-                CallResult.Success(TokenIntrospectResult(active = false)),
+            given(idpClient.validateToken(any(), any())).willReturn(
+                CallResult.Success(TokenValidationResult(active = false)),
             )
 
             val client = createClient { }
@@ -872,7 +878,8 @@ class ProxyRoutesTest {
                                                     scopes = listOf("read", "write"),
                                                     authorizeUrl = "http://idp:8080/authorize",
                                                     tokenUrl = "http://idp:8080/token",
-                                                    introspectUrl = "http://idp:8080/introspect",
+                                                    issuer = "http://idp:8080",
+                                                    jwksUrl = "http://idp:8080/jwks",
                                                     logoutUrl = "http://idp:8080/logout",
                                                 ),
                                         ),
@@ -891,7 +898,7 @@ class ProxyRoutesTest {
             }
 
             // Mock token introspection failure
-            given(idpClient.tokenIntrospect(any(), any())).willReturn(
+            given(idpClient.validateToken(any(), any())).willReturn(
                 CallResult.Failure(IdpClientErrorCode.BAD_REQUEST),
             )
 
@@ -935,7 +942,8 @@ class ProxyRoutesTest {
                                                     scopes = listOf("read", "write"),
                                                     authorizeUrl = "http://idp:8080/authorize",
                                                     tokenUrl = "http://idp:8080/token",
-                                                    introspectUrl = "http://idp:8080/introspect",
+                                                    issuer = "http://idp:8080",
+                                                    jwksUrl = "http://idp:8080/jwks",
                                                     logoutUrl = "http://idp:8080/logout",
                                                 ),
                                         ),
@@ -991,7 +999,8 @@ class ProxyRoutesTest {
                                                     scopes = listOf("read", "write"),
                                                     authorizeUrl = "http://idp:8080/authorize",
                                                     tokenUrl = "http://idp:8080/token",
-                                                    introspectUrl = "http://idp:8080/introspect",
+                                                    issuer = "http://idp:8080",
+                                                    jwksUrl = "http://idp:8080/jwks",
                                                     logoutUrl = "http://idp:8080/logout",
                                                 ),
                                         ),

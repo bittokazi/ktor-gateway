@@ -19,9 +19,10 @@ enum class AuthType {
 data class OauthClient(
     val clientId: String,
     val clientSecret: String,
+    val issuer: String,
     val scopes: List<String>,
     val authorizeUrl: String,
     val tokenUrl: String,
-    val introspectUrl: String,
     val logoutUrl: String,
+    val jwksUrl: String,
 )

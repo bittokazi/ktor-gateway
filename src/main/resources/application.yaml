@@ -41,7 +41,7 @@ proxy:
     "example1.com":
       - prefix: /
         target: http://192.168.10.1
-        secure: true
+        authType: TOKEN_BASED
   oauth-clients:
     "": #blank means default/any domain will match
       clientId: "api-client"
@@ -50,9 +50,10 @@ proxy:
         - openid
         - profile
         - email
+      issuer: "http://localhost:8081"
+      jwksUrl: "http://localhost:8081/.well-known/jwks.json"
       authorizeUrl: "http://localhost:8081/oauth/authorize"
       tokenUrl: "http://localhost:8081/oauth/token"
-      introspectUrl: "http://localhost:8081/oauth/introspect"
       logoutUrl: "http://localhost:8081/oauth/logout"
     "example1.com":
       clientId: "api-client"
@@ -61,7 +62,8 @@ proxy:
         - openid
         - profile
         - email
+      issuer: "http://localhost:8081"
+      jwksUrl: "http://localhost:8081/.well-known/jwks.json"
       authorizeUrl: "http://localhost:8081/oauth/authorize"
       tokenUrl: "http://localhost:8081/oauth/token"
-      introspectUrl: "http://localhost:8081/oauth/introspect"
       logoutUrl: "http://localhost:8081/oauth/logout"

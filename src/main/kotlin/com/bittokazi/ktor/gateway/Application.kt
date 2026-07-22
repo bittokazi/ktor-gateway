@@ -14,6 +14,7 @@ fun Application.module() {
     install(GatewayPlugin) {
         gatewayOauthBasePath = "/gateway"
         sessionValidityInSeconds = 3600
+        // if proxyConfig is set from code than application.yaml configuration will be ignored
         proxyConfig =
             ProxyConfig(
                 enabled = true,

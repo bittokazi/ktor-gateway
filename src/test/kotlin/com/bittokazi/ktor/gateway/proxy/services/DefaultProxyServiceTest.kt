@@ -248,7 +248,7 @@ class DefaultProxyServiceTest {
     @Test
     fun testGetOauthClientForHost() =
         runTest {
-            val client = OauthClient("client", "secret", listOf(), "", "", "", "")
+            val client = OauthClient("client", "secret", "", listOf(), "", "", "", "")
 
             defaultProxyService =
                 DefaultProxyService(
@@ -263,7 +263,7 @@ class DefaultProxyServiceTest {
     @Test
     fun testGetOauthClientFallsBackToDefault() =
         runTest {
-            val client = OauthClient("default", "secret", listOf(), "", "", "", "")
+            val client = OauthClient("default", "secret", "", listOf(), "", "", "", "")
 
             defaultProxyService =
                 DefaultProxyService(
@@ -278,8 +278,8 @@ class DefaultProxyServiceTest {
     @Test
     fun testHostSpecificOauthClientOverridesDefault() =
         runTest {
-            val defaultClient = OauthClient("default", "secret", listOf(), "", "", "", "")
-            val hostClient = OauthClient("host", "secret", listOf(), "", "", "", "")
+            val defaultClient = OauthClient("default", "secret", "", listOf(), "", "", "", "")
+            val hostClient = OauthClient("host", "secret", "", listOf(), "", "", "", "")
 
             defaultProxyService =
                 DefaultProxyService(
