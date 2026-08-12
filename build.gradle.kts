@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.ktor.server.sessions)
     implementation(libs.ktor.server.auth.jwt)
     implementation(libs.logback.classic)
+    implementation(libs.ktor.server.compression)
 
     implementation(libs.ktor.oauth.authorization.server)
 

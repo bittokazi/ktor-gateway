@@ -6,4 +6,5 @@ data class GatewayConfig(
     var gatewayOauthBasePath: String = "/gateway",
     var sessionValidityInSeconds: Long = 3600,
     var proxyConfig: ProxyConfig? = null,
+    var configureHttp: Boolean = true,
 )
