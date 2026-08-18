@@ -20,6 +20,19 @@ class ProxyClient(
 ) {
     val log: Logger = LoggerFactory.getLogger(javaClass)
 
+    private val hopByHopHeaders =
+        setOf(
+            "Connection",
+            "Keep-Alive",
+            "Proxy-Authenticate",
+            "Proxy-Authorization",
+            "TE",
+            "Trailer",
+            "Transfer-Encoding",
+            "Upgrade",
+            "Content-Length",
+        )
+
     init {
         log.info("[INFO] ProxyClient is created")
     }
@@ -38,8 +51,16 @@ class ProxyClient(
             }
 
             // Copy headers, body, etc.
-            headers.appendAll(call.request.headers)
+            call.request.headers.forEach { key, values ->
+                if (!isHopByHopHeader(key)) {
+                    values.forEach { value ->
+                        headers.append(key, value)
+                    }
+                }
+            }
 
             setBody(call.receiveChannel())
         }
+
+    private fun isHopByHopHeader(name: String): Boolean = name in hopByHopHeaders
 }
