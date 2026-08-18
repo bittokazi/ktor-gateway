@@ -28,7 +28,7 @@ val GatewayPlugin =
             }
         }
 
-        application.configureFrameworks()
+        application.configureFrameworks(gatewayConfig = config)
         application.configureSerialization()
         application.configureHTTP()
         application.configureSecurityModule(
