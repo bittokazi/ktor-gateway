@@ -30,7 +30,11 @@ val GatewayPlugin =
 
         application.configureFrameworks(gatewayConfig = config)
         application.configureSerialization()
-        application.configureHTTP()
+
+        if (config.configureHttp) {
+            application.configureHTTP()
+        }
+
         application.configureSecurityModule(
             config.gatewayOauthBasePath,
             config.sessionValidityInSeconds,

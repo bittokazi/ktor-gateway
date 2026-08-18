@@ -9,4 +9,5 @@ data class GatewayConfig(
     var requestTimeoutMillis: Long = 60_000,
     var connectTimeoutMillis: Long = 20_000,
     var socketTimeoutMillis: Long = 60_000,
+    var configureHttp: Boolean = true,
 )

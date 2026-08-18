@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "com.bittokazi.sonartype"
-version = "1.0.2"
+version = "1.0.3"
 
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.ktor.server.sessions)
     implementation(libs.ktor.server.auth.jwt)
     implementation(libs.logback.classic)
+    implementation(libs.ktor.server.compression)
 
     implementation(libs.ktor.oauth.authorization.server)
 

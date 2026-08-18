@@ -43,6 +43,7 @@ class PluginTest {
                                         ),
                                 ),
                         )
+                    configureHttp = true
                 }
 
                 val proxyConfig: ProxyConfig by dependencies
