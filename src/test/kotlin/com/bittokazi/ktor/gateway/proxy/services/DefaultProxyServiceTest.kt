@@ -144,6 +144,7 @@ class DefaultProxyServiceTest {
                                             RouteRule("/api/v1", "http://service2"),
                                             RouteRule("/api/v1/users", "http://service3"),
                                             RouteRule("/api", "http://service4"),
+                                            RouteRule("/api/", "http://service5"),
                                         ),
                                 ),
                         ),
@@ -169,6 +170,9 @@ class DefaultProxyServiceTest {
 
             rule = defaultProxyService.getRule("", "/api/v1/users", call)
             assertEquals("http://service3", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/api/", call)
+            assertEquals("http://service5", rule?.target)
         }
 
     @Test

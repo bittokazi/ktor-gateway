@@ -5,7 +5,6 @@ import io.ktor.client.plugins.timeout
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.headers
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.receiveChannel
@@ -40,6 +39,7 @@ class ProxyClient(
     suspend fun request(
         call: ApplicationCall,
         targetUrl: String,
+        skipHopByHopHeaders: Boolean = true,
     ): HttpResponse =
         client.request(targetUrl) {
             method = call.request.httpMethod
@@ -52,10 +52,18 @@ class ProxyClient(
 
             // Copy headers, body, etc.
             call.request.headers.forEach { key, values ->
-                if (!isHopByHopHeader(key)) {
-                    values.forEach { value ->
-                        headers.append(key, value)
-                    }
+                when (skipHopByHopHeaders) {
+                    true ->
+                        if (!isHopByHopHeader(key)) {
+                            values.forEach { value ->
+                                headers.append(key, value)
+                            }
+                        }
+
+                    false ->
+                        values.forEach { value ->
+                            headers.append(key, value)
+                        }
                 }
             }
 
