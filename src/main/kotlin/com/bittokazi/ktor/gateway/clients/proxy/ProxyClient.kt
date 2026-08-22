@@ -39,7 +39,7 @@ class ProxyClient(
     suspend fun request(
         call: ApplicationCall,
         targetUrl: String,
-        skipHopByHopHeaders: Boolean = true,
+        skipHopByHopHeaders: Boolean = false,
     ): HttpResponse =
         client.request(targetUrl) {
             method = call.request.httpMethod

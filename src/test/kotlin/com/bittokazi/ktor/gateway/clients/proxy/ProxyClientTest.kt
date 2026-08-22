@@ -61,7 +61,7 @@ class ProxyClientTest {
         }
 
     @Test
-    fun `request forwards call and returns proxied response with skip hop by hop header false`() =
+    fun `request forwards call and returns proxied response with skip hop by hop header true`() =
         testApplication {
             val mockEngine =
                 MockEngine { _ ->
@@ -84,7 +84,7 @@ class ProxyClientTest {
             application {
                 routing {
                     post("/proxy") {
-                        val resp = proxyClient.request(call, "http://upstream/target", false)
+                        val resp = proxyClient.request(call, "http://upstream/target", true)
                         val body = resp.bodyAsText()
                         call.respondText(body, status = resp.status)
                     }
