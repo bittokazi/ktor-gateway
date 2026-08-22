@@ -108,7 +108,7 @@ class ProxyRoutesTest {
             val body = ByteReadChannel("handled: /api/hello?x=1")
             val statusCode = HttpStatusCode.fromValue(statusCodeValue)
 
-            given(proxyClient.request(any(), any())).willReturn(
+            given(proxyClient.request(any(), any(), any())).willReturn(
                 DefaultHttpResponse(
                     call = httpClientCall,
                     responseData =
@@ -219,7 +219,7 @@ class ProxyRoutesTest {
                 proxyRoutes()
             }
 
-            given(proxyClient.request(any(), any())).willThrow(
+            given(proxyClient.request(any(), any(), any())).willThrow(
                 RuntimeException("Upstream error"),
             )
 
@@ -389,7 +389,7 @@ class ProxyRoutesTest {
             }
 
             val body = ByteReadChannel("session protected content")
-            given(proxyClient.request(any(), any())).willReturn(
+            given(proxyClient.request(any(), any(), any())).willReturn(
                 DefaultHttpResponse(
                     call = httpClientCall,
                     responseData =
@@ -474,7 +474,7 @@ class ProxyRoutesTest {
             }
 
             val body = ByteReadChannel("refreshed and proxied content")
-            given(proxyClient.request(any(), any())).willReturn(
+            given(proxyClient.request(any(), any(), any())).willReturn(
                 DefaultHttpResponse(
                     call = httpClientCall,
                     responseData =
@@ -753,7 +753,7 @@ class ProxyRoutesTest {
             }
 
             val body = ByteReadChannel("token protected content")
-            given(proxyClient.request(any(), any())).willReturn(
+            given(proxyClient.request(any(), any(), any())).willReturn(
                 DefaultHttpResponse(
                     call = httpClientCall,
                     responseData =
