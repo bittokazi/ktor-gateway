@@ -142,7 +142,7 @@ class DefaultProxyService(
         val targetUrl = rule.target + call.request.uri
 
         try {
-            val response = proxyClient.request(call, targetUrl)
+            val response = proxyClient.request(call, targetUrl, rule.skipHopByHopHeaders)
 
             response
                 .headers

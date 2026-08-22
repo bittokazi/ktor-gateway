@@ -59,4 +59,46 @@ class ProxyClientTest {
             assertEquals(200, response.status.value)
             assertEquals("proxied content", response.bodyAsText())
         }
+
+    @Test
+    fun `request forwards call and returns proxied response with skip hop by hop header false`() =
+        testApplication {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content = "proxied content",
+                        status = io.ktor.http.HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "text/plain"),
+                    )
+                }
+
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ClientContentNegotiation) {
+                        json()
+                    }
+                }
+
+            val proxyClient = ProxyClient(httpClient)
+
+            application {
+                routing {
+                    post("/proxy") {
+                        val resp = proxyClient.request(call, "http://upstream/target", false)
+                        val body = resp.bodyAsText()
+                        call.respondText(body, status = resp.status)
+                    }
+                }
+            }
+
+            val client = createClient { }
+            val response =
+                client.post("/proxy") {
+                    setBody("hello-from-client")
+                    header("X-Test", "1")
+                }
+
+            assertEquals(200, response.status.value)
+            assertEquals("proxied content", response.bodyAsText())
+        }
 }

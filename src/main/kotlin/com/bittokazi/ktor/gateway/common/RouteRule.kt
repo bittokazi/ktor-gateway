@@ -7,6 +7,7 @@ data class RouteRule(
     val prefix: String,
     val target: String,
     val authType: AuthType = AuthType.NONE,
+    val skipHopByHopHeaders: Boolean = true,
 )
 
 enum class AuthType {
