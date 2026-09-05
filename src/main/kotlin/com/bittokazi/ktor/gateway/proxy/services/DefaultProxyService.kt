@@ -173,10 +173,76 @@ class DefaultProxyService(
     fun matches(
         path: String,
         prefix: String,
-    ): Boolean =
-        prefix == "/" ||
-            path == prefix ||
-            (path.startsWith(prefix) && path.getOrNull(prefix.length) == '/')
+    ): Boolean {
+        if (prefix == "/") {
+            return true
+        }
+
+        // No wildcard:
+        // /api matches /api, /api/, /api/users, /api/users/edit
+        //
+        // /api does NOT match /api-public
+        if (!prefix.contains("*")) {
+            return path == prefix ||
+                path.startsWith("$prefix/")
+        }
+
+        val pathSegments =
+            path
+                .trim('/')
+                .split('/')
+                .filter(String::isNotEmpty)
+
+        val prefixSegments =
+            prefix
+                .trim('/')
+                .split('/')
+                .filter(String::isNotEmpty)
+
+        fun match(
+            pathIndex: Int,
+            prefixIndex: Int,
+        ): Boolean {
+            // Entire prefix consumed
+            if (prefixIndex == prefixSegments.size) {
+                return pathIndex == pathSegments.size
+            }
+
+            val prefixSegment = prefixSegments[prefixIndex]
+
+            if (prefixSegment == "*") {
+                val isLast = prefixIndex == prefixSegments.lastIndex
+
+                if (isLast) {
+                    // Final * matches zero or more segments.
+                    return true
+                }
+
+                // * in the middle must match ONE OR MORE segments.
+                //
+                // Try consuming 1, 2, 3, ... path segments.
+                for (i in pathIndex until pathSegments.size) {
+                    if (match(i + 1, prefixIndex + 1)) {
+                        return true
+                    }
+                }
+
+                return false
+            }
+
+            if (pathIndex >= pathSegments.size) {
+                return false
+            }
+
+            if (prefixSegment != pathSegments[pathIndex]) {
+                return false
+            }
+
+            return match(pathIndex + 1, prefixIndex + 1)
+        }
+
+        return match(0, 0)
+    }
 
     override suspend fun getRule(
         domain: String?,
