@@ -176,6 +176,101 @@ class DefaultProxyServiceTest {
         }
 
     @Test
+    fun testGetRuleUsesBasePrefixAndWildcardRoutes() =
+        runTest {
+            defaultProxyService =
+                DefaultProxyService(
+                    idpClient = idpClient,
+                    proxyClient = proxyClient,
+                    proxyConfig =
+                        ProxyConfig(
+                            enabled = true,
+                            routes =
+                                mapOf(
+                                    "" to
+                                        listOf(
+                                            RouteRule("/", "http://service1"),
+                                            RouteRule("/api/v1", "http://service2"),
+                                            RouteRule("/api/v1/users", "http://service3"),
+                                            RouteRule("/api", "http://service4"),
+                                            RouteRule("/api/", "http://service5"),
+                                            // Wildcard routes
+                                            RouteRule("/users", "http://users"),
+                                            RouteRule("/users/", "http://users-slash"),
+                                            RouteRule("/*/users", "http://wildcard-users"),
+                                        ),
+                                ),
+                        ),
+                )
+
+            // Root / catch-all
+            var rule = defaultProxyService.getRule("", "/any/route", call)
+            assertEquals("http://service1", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/", call)
+            assertEquals("http://service1", rule?.target)
+
+            // /api
+            rule = defaultProxyService.getRule("", "/api", call)
+            assertEquals("http://service4", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/api-public", call)
+            assertEquals("http://service1", rule?.target)
+
+            // /api/v1
+            rule = defaultProxyService.getRule("", "/api/v1/any", call)
+            assertEquals("http://service2", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/api/v1", call)
+            assertEquals("http://service2", rule?.target)
+
+            // More specific /api/v1/users
+            rule = defaultProxyService.getRule("", "/api/v1/users", call)
+            assertEquals("http://service3", rule?.target)
+
+            // Trailing slash is distinct
+            rule = defaultProxyService.getRule("", "/api/", call)
+            assertEquals("http://service5", rule?.target)
+
+            // ---------------------------------------------------------
+            // Prefix matching without wildcard
+            // ---------------------------------------------------------
+
+            rule = defaultProxyService.getRule("", "/users", call)
+            assertEquals("http://users", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/users/", call)
+            assertEquals("http://users-slash", rule?.target)
+
+            // /users is a prefix, so child paths also match
+            rule = defaultProxyService.getRule("", "/users/profile", call)
+            assertEquals("http://users", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/users/a/b/c", call)
+            assertEquals("http://users", rule?.target)
+
+            // ---------------------------------------------------------
+            // Wildcard in the middle: /*/users
+            // ---------------------------------------------------------
+
+            rule = defaultProxyService.getRule("", "/123/users", call)
+            assertEquals("http://wildcard-users", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/abc/users", call)
+            assertEquals("http://wildcard-users", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/abc/xyz/users", call)
+            assertEquals("http://wildcard-users", rule?.target)
+
+            rule = defaultProxyService.getRule("", "/abc/xyz/foo/users", call)
+            assertEquals("http://wildcard-users", rule?.target)
+
+            // The final "users" part is required
+            rule = defaultProxyService.getRule("", "/abc/xyz/foo", call)
+            assertEquals("http://service1", rule?.target)
+        }
+
+    @Test
     fun testHostSpecificRuleOverridesDefaultRule() =
         runTest {
             defaultProxyService =

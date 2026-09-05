@@ -11,6 +11,14 @@ import io.ktor.server.plugins.di.dependencies
 fun Application.proxyModule() {
     val proxyConfig: ProxyConfig by dependencies
 
+    proxyConfig.routes
+        .flatMap { it.value }
+        .forEach {
+            if (it.prefix.endsWith("*")) {
+                throw IllegalArgumentException("Route prefix cannot end with a wildcard '*': ${it.prefix}")
+            }
+        }
+
     dependencies {
         when (proxyConfig.enabled) {
             true ->
